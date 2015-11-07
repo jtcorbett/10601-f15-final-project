@@ -3,7 +3,7 @@ function feat = extract_feature(image)
 % This function takes one image as input and returns HOG feature.
 %
 % Input: image
-% Following VLFeat instruction, the input image should be SINGLE precision. 
+% Following VLFeat instruction, the input image should be SINGLE precision.
 % If not, the image is automatically converted to SINGLE precision.
 %
 % Output: feat
@@ -18,7 +18,7 @@ function feat = extract_feature(image)
 if ~isa(image, 'single'), image = single(image); end;
 
 
-%% extract HOG 
+%% extract HOG
 cellSize = 8;
 hog = vl_hog(image, cellSize, 'verbose');
 imhog = vl_hog('render', hog, 'verbose');
