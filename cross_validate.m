@@ -1,8 +1,9 @@
-function results = cross_validate(data, labels, k)
-	new_locs = randperm(length(labels));
-	for i=1:length(labels)
+function results = cross_validate(raw_data, raw_labels, k)
+	new_locs = randperm(length(raw_labels));
+	for i=1:length(raw_labels)
 		new_loc = new_locs(i);
-        transformed_data(new_loc, :) = data(i, :);
+		data(new_loc, :) = raw_data(i, :);
+		labels(new_loc, :) = raw_labels(i, :);
 	end
 
 	prt_size = floor(length(labels)/k);
