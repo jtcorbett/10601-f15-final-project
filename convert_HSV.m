@@ -5,5 +5,5 @@ function [hsv] = convert_HSV(feat)
     g = double(feat(1025:2048)) ./ 255;
     b = double(feat(2049:3072)) ./ 255;
     hsv = uint8(round(rgb2hsv([r' g' b']) .* 255));
-    hsv = [hsv(:,1)' hsv(:,2)' hsv(:,3)']
+    hsv = [hsv(:,1)' hsv(:,2)' hsv(:,3)'];
 end
