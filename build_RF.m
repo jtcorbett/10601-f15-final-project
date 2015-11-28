@@ -1,4 +1,4 @@
-function model = build_RF(data, labels, n, k)
+function model = build_RF(data, labels, parameters)
     % build multiple trees and store in cell array
 end
 

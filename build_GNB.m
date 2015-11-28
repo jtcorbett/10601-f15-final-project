@@ -1,4 +1,4 @@
-function gnb_model = build_GNB(data, labels)
+function model = build_GNB(data, labels, parameters)
     offset = 1 - min(labels);
     labels = labels + offset;
 
@@ -35,5 +35,5 @@ function gnb_model = build_GNB(data, labels)
         end
     end
 
-    gnb_model = {offset, prior, u, s};
+    model = {offset, prior, u, s};
 end

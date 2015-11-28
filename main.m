@@ -1,6 +1,6 @@
 function results = main(data, labels, k, features_id, model_id, feature_parameters, model_parameters)
 	if size(data, 1) ~= size(labels, 1)
-		error('Data and labels different lengths')
+		error('Data and labels different lengths');
 	end
   if ~exist('feature_parameters')
     feature_parameters = [];
@@ -29,13 +29,13 @@ function results = main(data, labels, k, features_id, model_id, feature_paramete
 			results(i, j) = test_fn(model, test_features(j, :)) == test_labels(j);
 		end
 	end
-  
-  sum(results, 2) / size(results, 2)
-  sum(sum(results)) / (size(results, 1) * size(results, 2))
+
+  sum(results, 2) / size(results, 2);
+  sum(sum(results)) / (size(results, 1) * size(results, 2));
 end
 
 % try running:
 % main(data, labels, 10, 'NONE', 'SHITTY');
-% 
+%
 % if your feature extractor or model have additional parameters, you can pass those in:
 % main(data, labels, 10, 'NONE', 'NN', {}, {10 [500 500] .15});

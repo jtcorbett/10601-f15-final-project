@@ -1,4 +1,4 @@
-function feat = convert_VLFeat(image)
+function feat = convert_VLFeat(image, feature_parameters)
 %% Description
 % This function takes one image as input and returns HOG feature.
 %
