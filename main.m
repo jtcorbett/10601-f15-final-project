@@ -16,8 +16,11 @@ function results = main(data, labels, k, features_id, model_id, feature_paramete
 		test_labels = cell2mat(datasets(i, 4));
 
 		conv_fn = str2func(strcat('convert_', features_id));
+		for j=1:size(train_data, 1)
+    			train_features(j, :) = conv_fn(train_data(j, :), feature_parameters);
+    end
+
 		for j=1:size(test_data, 1)
-			train_features(j, :) = conv_fn(train_data(j, :), feature_parameters);
 			test_features(j, :) = conv_fn(test_data(j, :), feature_parameters);
 		end
 
