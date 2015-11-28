@@ -30,8 +30,8 @@ function results = main(data, labels, k, features_id, model_id, feature_paramete
 		end
 	end
 
-  sum(results, 2) / size(results, 2);
-  sum(sum(results)) / (size(results, 1) * size(results, 2));
+  sum(results, 2) / size(results, 2)
+  sum(sum(results)) / (size(results, 1) * size(results, 2))
 end
 
 % try running:
