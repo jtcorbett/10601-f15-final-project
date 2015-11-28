@@ -12,7 +12,7 @@ function category = test_GNB(model, features)
     for j = 1:K
         p = log(prior(j));
         for i = 1:F
-            p = p + log(normpdf(features(i),u(i,k),s(i,k)));
+            p = p + log(normpdf(double(features(i)),u(i,j),s(i,j)));
         end
 
         if p > max_p

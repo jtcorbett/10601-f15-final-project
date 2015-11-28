@@ -18,12 +18,12 @@ function gnb_model = build_GNB(data, labels)
         for j = 1:K
 
             % calculate mean
-            u(i,j) = 1/sum(labels==j) * sum(X(find(labels==j),i));
+            u(i,j) = 1/sum(labels==j) * sum(data(find(labels==j),i));
 
             % calculate variance
             for n = 1:N
                 if labels(n) == j
-                    s(i,j) = (X(n,i) - u(i,k))^2;
+                    s(i,j) = (data(n,i) - u(i,j))^2;
                 end
             end
 
