@@ -1,8 +1,8 @@
-function model = build_RF(train, labels, n, k)
+function model = build_RF(data, labels, n, k)
     % build multiple trees and store in cell array
 end
 
-function tree_model = build_tree(train, labels)
+function tree_model = build_tree(data, labels)
     Y = unique(labels);
 
     if size(Y,1) == 0
@@ -14,28 +14,29 @@ function tree_model = build_tree(train, labels)
     end
 
     % select feature that maximizes gain
-    F = size(train,2);
+    F = size(data,2);
     selected = 1;
     max_gain = 0;
 
     for f = 1:F
-        g = gain(labels, train(:,f));
+        g = gain(labels, data(:,f));
         if g > max_gain
             selected = f;
             max_gain = g;
         end
     end
 
-    pos_indicies = find(train(:,selected)==1);
-    neg_indicies = find(train(:,selected)==0);
+    % labels = labels(labels ~= selected)
+
+    pos_indicies = find(data(:,selected)==1);
+    neg_indicies = find(data(:,selected)==0);
 
     tree_model = [
         selected ;
-        build_tree(train(pos_indicies,:), labels(pos_indicies)) ;
-        build_tree(train(neg_indicies,:), labels(neg_indicies))
+        build_tree(data(pos_indicies,:), labels(pos_indicies)) ;
+        build_tree(data(neg_indicies,:), labels(neg_indicies))
     ];
 
-    labels = labels(labels ~= selected)
 end
 
 function I = gain(X,Y)
