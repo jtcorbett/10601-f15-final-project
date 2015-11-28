@@ -1,8 +1,11 @@
 function gnb_model = build_GNB(data, labels)
+    offset = 1 - min(labels);
+    labels = labels + offset;
+
     N = length(labels);
     F = size(data,2);
     Y = unique(labels);
-    K = length(Y);
+    K = max(Y);
 
     % calculate priors
     prior = zeros(size(Y));
@@ -23,7 +26,7 @@ function gnb_model = build_GNB(data, labels)
             % calculate variance
             for n = 1:N
                 if labels(n) == j
-                    s(i,j) = (data(n,i) - u(i,j))^2;
+                    s(i,j) = s(i,j) + (data(n,i) - u(i,j))^2;
                 end
             end
 
@@ -32,5 +35,5 @@ function gnb_model = build_GNB(data, labels)
         end
     end
 
-    gnb_model = {prior, u, s};
+    gnb_model = {offset, prior, u, s};
 end
