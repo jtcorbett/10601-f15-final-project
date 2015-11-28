@@ -1,7 +1,7 @@
 function model = build_NN(data, labels, parameters)
   if length(parameters) == 0
     classes = 10;
-    hidden_layers = [];
+    hidden_layers = []; % row vector [500 500]
     learning_rate = .05;
   else
     classes = parameters{1};
