@@ -34,7 +34,7 @@ function model = build_NN(data, labels, parameters)
 
     % calculate delta for each node for each layer
     deltas = cell(M, 1);
-    deltas{M} = transpose(outputs{M} .* (1-outputs{M}) .* (answer.-outputs{M}));
+    deltas{M} = transpose(outputs{M} .* (1 - outputs{M}) .* (answer - outputs{M}));
     for layer_i=M-1:-1:1
       o = outputs{layer_i};
       w = weights{layer_i+1};
@@ -44,11 +44,11 @@ function model = build_NN(data, labels, parameters)
     end
 
     % update weights
-    weights{1} = weights{1} + (learning_rate * transpose(horzcat([1.0], features)) .* transpose(deltas{1}));
+    weights{1} = weights{1} + (learning_rate * transpose(horzcat([1.0], features)) * transpose(deltas{1}));
     for layer_i=2:M
       inputs = horzcat([1.0], outputs{layer_i-1});
       delta = deltas{layer_i};
-      weights{layer_i} = weights{layer_i} + (learning_rate * transpose(inputs) .* transpose(delta));
+      weights{layer_i} = weights{layer_i} + (learning_rate * transpose(inputs) * transpose(delta));
     end
   end
 
