@@ -58,6 +58,7 @@ function model = build_NN(data, labels, parameters)
         deltas{layer_i} = (weights{layer_i+1}'*deltas{layer_i+1}) .* sigmdiff(activation{layer_i}); %'
       end
 
+<<<<<<< HEAD
       % update weights and biases
       for layer_i=2:L
         weights{layer_i} = weights{layer_i} - (learning_rate)*(deltas{layer_i}*output{layer_i-1}'); %'
@@ -72,6 +73,25 @@ function model = build_NN(data, labels, parameters)
         good(sample_j) = 1;
         % sample_j
       end
+=======
+    % calculate delta for each node for each layer
+    deltas = cell(M, 1);
+    deltas{M} = transpose(outputs{M} .* (1 - outputs{M}) .* (answer - outputs{M}));
+    for layer_i=M-1:-1:1
+      o = outputs{layer_i};
+      w = weights{layer_i+1};
+      d = deltas{layer_i+1};
+      diff = transpose(w*d);
+      deltas{layer_i} = transpose(o .* (1-o) .* diff(2:end)); % ignore bias term
+    end
+
+    % update weights
+    weights{1} = weights{1} + (learning_rate * transpose(horzcat([1.0], features)) * transpose(deltas{1}));
+    for layer_i=2:M
+      inputs = horzcat([1.0], outputs{layer_i-1});
+      delta = deltas{layer_i};
+      weights{layer_i} = weights{layer_i} + (learning_rate * transpose(inputs) * transpose(delta));
+>>>>>>> 6946eed6b9c20358d6f3132ee1cd6d4d039de9c9
     end
     
     acc = sum(good)/size(data,1)

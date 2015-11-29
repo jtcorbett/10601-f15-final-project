@@ -35,7 +35,7 @@ function results = main(data, labels, k, features_id, model_id, feature_paramete
 
   sum(results, 2) / size(results, 2)
   sum(sum(results)) / (size(results, 1) * size(results, 2))
-  save("model.mat", "model")
+  save('model.mat', 'model')
 
 end
 
