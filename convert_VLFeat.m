@@ -8,7 +8,7 @@ function feat = convert_VLFeat(image, feature_parameters)
 %
 % Output: feat
 % The output is a vectorized HOG descriptor.
-% The feature demension depends on the parameter, cellSize.
+% The feature dimension depends on the parameter, cellSize.
 %
 % VLFeat must be added to MATLAB search path. Please check the link below.
 % http://www.vlfeat.org/install-matlab.html
@@ -20,8 +20,8 @@ if ~isa(image, 'single'), image = single(image); end;
 
 %% extract HOG
 cellSize = 8;
-hog = vl_hog(image, cellSize, 'verbose');
-imhog = vl_hog('render', hog, 'verbose');
+hog = vl_hog(image, cellSize);
+imhog = vl_hog('render', hog);
 clf; imagesc(imhog); colormap gray;
 
 
