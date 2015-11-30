@@ -14,12 +14,12 @@ function model = build_NN(data, labels, parameters)
     batch_size = parameters{5};
     evaluate_thresh = parameters{6};
   end
-  
+
   data = double(data);
   layers = horzcat([size(data, 2)], hidden_layers, [classes]);
   L = size(layers, 2); % number of layers (besides input)
   N = size(data, 1);
-  
+
   weights = cell(L, 1);
   batch_weights = cell(L, 1);
   biases = cell(L, 1);
@@ -37,10 +37,10 @@ function model = build_NN(data, labels, parameters)
     output{layer_i} = zeros(layers(layer_i), 1);
     delta{layer_i} = zeros(layers(layer_i), 1);
   end
-  
+
   %old_weights = weights;
   old_acc = 0;
-  
+
   iterations = 0;
   strikes = 0;
   evaluate_count = 0;
@@ -48,7 +48,7 @@ function model = build_NN(data, labels, parameters)
   while strikes < 3
     iterations = iterations + 1;
     batch_count = 0;
-    
+
     % update the weights
     while batch_count < batch_size
       features = data(sample_i, :);
@@ -60,7 +60,7 @@ function model = build_NN(data, labels, parameters)
         batch_weights{layer_i} = zeros(layers(layer_i), layers(layer_i-1));
         batch_biases{layer_i} = zeros(layers(layer_i), 1);
       end
-      
+
       % calculate output for each node for each layer
       output{1} = features';
       for layer_i=2:L
@@ -80,22 +80,22 @@ function model = build_NN(data, labels, parameters)
         batch_weights{layer_i} = batch_weights{layer_i} + (deltas{layer_i}*output{layer_i-1}'); %'
         batch_biases{layer_i} = batch_biases{layer_i} + deltas{layer_i};
       end
-      
+
       if sample_i==N
         sample_i = 1;
       else
         sample_i = sample_i + 1;
       end
-      
+
       batch_count = batch_count + 1;
     end
-    
+
     % update weights and biases
     for layer_i=2:L
       weights{layer_i} = weights{layer_i} - (learning_rate)*batch_weights{layer_i};
       biases{layer_i} = biases{layer_i} - (learning_rate)*batch_biases{layer_i};
     end
-    
+
     % evaluate performance and decide whether or not to continue
     if evaluate_count > evaluate_thresh
       iterations
@@ -106,7 +106,7 @@ function model = build_NN(data, labels, parameters)
           % sample_j
         end
       end
-      
+
       % when the increase in accuracy is too small, give a strike. if this happens several times, stop running
       acc = sum(good)/size(data,1)
       acc_diff = acc - old_acc
@@ -120,15 +120,15 @@ function model = build_NN(data, labels, parameters)
     else
       evaluate_count = evaluate_count + 1;
     end
-    
+
     %sum(sum(abs(weights{2}-old_weights{2})))
     %sum(sum(abs(weights{3}-old_weights{3})))
     %sum(sum(abs(weights{4}-old_weights{4})))
     %old_weights = weights;
-    
-    fflush(stdout);
+
+    % fflush(stdout);
   end
-  
+
   model = {weights biases};
 end
 
