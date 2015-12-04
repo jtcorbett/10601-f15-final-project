@@ -1,3 +1,6 @@
 *.DS_Store
 *~~
 vlfeat
+cifar-100-matlab
+model.mat
+octave-workspace

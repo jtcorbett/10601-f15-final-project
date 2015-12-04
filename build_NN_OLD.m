@@ -19,12 +19,12 @@ function model = build_NN(data, labels, parameters)
     weights{layer_i} = rand(layers(layer_i) + 1, layers(layer_i+1))-.5;
   end
   old_weights = weights;
-  
+
   iterations = 0;
   finished = 0;
   while ~finished
     iterations = iterations + 1
-    
+
     % update the weights
     for sample_i=1:size(data, 1)
       features = data(sample_i, :);
@@ -58,7 +58,7 @@ function model = build_NN(data, labels, parameters)
         weights{layer_i} = weights{layer_i} + (learning_rate * transpose(inputs) .* transpose(delta));
       end
     end
-    
+
     % evaluate performance and decide whether or not to continue
     good = zeros(size(data, 1), 1);
     for sample_i=1:size(data, 1)
@@ -67,8 +67,8 @@ function model = build_NN(data, labels, parameters)
         % sample_i
       end
     end
-    
-    "\n"
+
+    '\n'
     acc = sum(good)/size(data,1)
     if acc > .99
       finished = 1;
@@ -77,9 +77,9 @@ function model = build_NN(data, labels, parameters)
     abs(acc - old_acc)
     sum(sum(abs(weights{1}-old_weights{1})))
     old_weights = weights;
-    
+
     fflush(stdout);
   end
-  
+
   model = weights;
 end

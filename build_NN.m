@@ -21,13 +21,13 @@ function model = build_NN(data, labels, parameters)
     batch_size = parameters{5};
     eval_size = parameters{6};
   end
-  
+
   
   data = double(data);
   layers = horzcat([size(data, 2)], hidden_layers, [classes]);
   L = size(layers, 2); % number of layers (besides input)
   N = size(data, 1);
-  
+
   weights = cell(L, 1);
   best_weights = cell(L, 1);
   batch_weights = cell(L, 1);
@@ -47,7 +47,7 @@ function model = build_NN(data, labels, parameters)
     output{layer_i} = zeros(layers(layer_i), 1);
     delta{layer_i} = zeros(layers(layer_i), 1);
   end
-  
+
   %old_weights = weights;
   old_acc = 0;
   max_acc = 0;
@@ -97,7 +97,7 @@ function model = build_NN(data, labels, parameters)
           batch_biases{layer_i} = batch_biases{layer_i} + deltas{layer_i};
         end
       end
-      
+
       % update weights and biases
       old_weights = weights;
       for layer_i=2:L
@@ -116,6 +116,7 @@ function model = build_NN(data, labels, parameters)
       %out = test_NN({weights biases}, eval_data(sample_i, :))
       if test_NN({weights biases}, eval_data(sample_i, :)) == eval_labels(sample_i)
         good(sample_i) = 1;
+        
         % "right"
         % sample_j
       end
@@ -139,11 +140,12 @@ function model = build_NN(data, labels, parameters)
     %sum(sum(abs(weights{3}-old_weights{3})))
     %sum(sum(abs(weights{4}-old_weights{4})))
     %old_weights = weights;
-    
-    fflush(stdout);
+
+    % fflush(stdout);
   end
   
   model = {weights biases};%{best_weights best_biases};
+
 end
 
 function ans = sigmf(x)
@@ -152,6 +154,14 @@ end
 
 function ans = sigmdiff(x)
   ans = sigmf(x) .* (1-sigmf(x));
+end
+
+function error(c, output, ans)
+  t = zeros(c, 1);
+  t(ans) = 1;
+  l = log(output);
+  t1 = 1 - t;
+  l1 = log(1 - output);
 end
 
 function clean(weights, biases)
