@@ -43,4 +43,4 @@ end
 % fast(data, labels, 10, 'NONE', 'SHITTY');
 %
 % if your feature extractor or model have additional parameters, you can pass those in:
-% fast(data, labels, 10, 'NONE', 'NN', {}, {10 [500 500] .15 .001 50});
+% fast(data, labels, 10, 'NONE', 'NN', {}, {10 [1000 500 250 100 50 25] .05 .001 1 900});

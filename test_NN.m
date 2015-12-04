@@ -12,6 +12,7 @@ function category = test_NN(model, features)
     output{layer_i} = sigmf(activation{layer_i});
   end
 
+  %outlayer = output{L}'
   [M I] = max(output{L});
 
   category = uint8(I) - 1;
