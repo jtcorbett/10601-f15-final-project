@@ -2,5 +2,5 @@
 *~~
 vlfeat
 cifar-100-matlab
-model.mat
+*.mat
 octave-workspace
