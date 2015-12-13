@@ -1,22 +1,26 @@
-function [category out] = test_NN(model, features)
+function [category output] = test_NN(model, features)
   weights = model{1};
   biases = model{2};
-  L = size(weights, 1);
-
-  activation = cell(L, 1);
-  output = cell(L, 1);  
+  preprocessing = model{3};
+  means = preprocessing{1};
   
-  output{1} = double(features)';
+  features = (double(features)-means)./127.0;
+  
+  L = size(weights, 1);
+  
+  z = cell(L, 1);  
+  activation = cell(L, 1);
+  
+  activation{1} = features;
   for layer_i=2:L
-    activation{layer_i} = weights{layer_i}*output{layer_i-1} + biases{layer_i}; %'
-    output{layer_i} = relu(activation{layer_i});
+    z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
+    activation{layer_i} = relu(z{layer_i});
   end
+  output = sftprobs(z{L});
 
-  %outlayer = output{L}'
-  [M I] = max(output{L});
+  [M I] = max(output);
 
   category = uint8(I) - 1;
-  out = output{L};
 end
 
 function ans = sigmf(x)
@@ -25,4 +29,9 @@ end
 
 function ans = relu(x)
   ans = (x > 0).*x;
+end
+
+function probs = sftprobs(vec)
+  expd = exp(vec);
+  probs = expd/sum(expd, 2);
 end
