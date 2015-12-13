@@ -13,6 +13,6 @@ function [train_data train_labels valid_data valid_labels] = createBigData()
   train_labels = vertcat(blabels, labels);
   
   load subset_CIFAR10/small_data_batch_5.mat
-  valid_data = vertcat(bdata, data);
-  valid_labels = vertcat(labels, labels);
+  valid_data = data;
+  valid_labels = labels;
 end
