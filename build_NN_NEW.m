@@ -85,7 +85,7 @@ function model = build_NN_NEW(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        dropout_mask = (rand(size(z{layer_i})) > p) / p;
+        dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
         z{layer_i} = z{layer_i}.*dropout_mask;
         activation{layer_i} = relu(z{layer_i});
       end
