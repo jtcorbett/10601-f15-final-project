@@ -26,8 +26,10 @@ function model = build_NN_NEW(data, labels, parameters)
     end
   end
 
-  %  model = build_NN_NEW(d, l, {10 [] .05 .8 10 100});
-  lamb = .0001; % regularization parameter. should eventually go to parameters
+  % model = build_NN_NEW(data, labels, {10 [500 100 50] 1 .80 100 1000});
+  
+  lamb = .001; % regularization parameter. should eventually go to parameters
+  dropout_p = .5 % percent of nodes which are dropped out. should eventually go to parameters
   
   means = mean(double(data));
 
@@ -83,6 +85,8 @@ function model = build_NN_NEW(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
+        dropout_mask = (rand(size(z{layer_i})) > p) / p;
+        z{layer_i} = z{layer_i}.*dropout_mask;
         activation{layer_i} = relu(z{layer_i});
       end
       output = sftprobs(z{L});
@@ -150,7 +154,8 @@ function model = build_NN_NEW(data, labels, parameters)
   end
   
   model = {weights biases {means}};
-
+  beep
+  
 end
 
 nl = sigmf
