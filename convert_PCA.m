@@ -1,5 +1,5 @@
 %% convert_PCA: Perform principal component analysis on the data
-function pca_reduced = convert_PCA(features, feature_parameters)
+function [pca_reduced data U] = convert_PCA(features, feature_parameters)
     if length(feature_parameters) == 0
         dimensions = 100;
         normalize = false;
@@ -10,16 +10,16 @@ function pca_reduced = convert_PCA(features, feature_parameters)
 
     data = double(features) - mean(features);
 
-    disp 'normalizing'; fflush(stdout);
+    % disp 'normalizing'; fflush(stdout);
     if normalize
         data = data ./ std(data);
     end
 
-    disp 'computing covar mat'; fflush(stdout);
+    % disp 'computing covar mat'; fflush(stdout);
     covar = cov(data);
     [U S V] = svd(covar);
 
-    disp 'PCA analysis'; fflush(stdout);
+    % disp 'PCA analysis'; fflush(stdout);
     dimensions = min(dimensions,size(U,2));
-    pca_reduced = dot(data, U(:,1:dimensions));
+    pca_reduced = data * U(:,1:dimensions);
 end
