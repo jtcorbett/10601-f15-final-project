@@ -68,7 +68,7 @@ function model = build_NN_NEW(data, labels, parameters)
   end
 
   old_acc = 0;
-  old_e = 0;
+  old_e = 99999999;
     
   epoch_count = 0;
   for epoch_i=1:epoch_num
