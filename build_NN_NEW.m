@@ -7,6 +7,9 @@ function model = build_NN_NEW(data, labels, parameters)
     epoch_num = 20;
     batch_size = 100;
     eval_size = 100;
+    lamb = .001; % regularization parameter
+    dropout_p = .5 % percent of nodes which are dropped out
+    mu = .9 % friction for momentum
   else
     classes = parameters{1};
     hidden_layers = parameters{2};
@@ -16,7 +19,7 @@ function model = build_NN_NEW(data, labels, parameters)
       epoch_num = parameters{4};
     else
       acc_thresh = parameters{4};
-      epoch_num = 1000;
+      epoch_num = 100;
     end
     batch_size = parameters{5};
     if parameters{6} > 0
@@ -24,12 +27,15 @@ function model = build_NN_NEW(data, labels, parameters)
     else
       eval_size = size(data, 1);
     end
+    lamb = parameters{7}; % regularization parameter
+    dropout_p = parameters{8} % percent of nodes which are dropped out
+    mu = parameters{9} % friction for momentum
   end
 
-  % model = build_NN_NEW(data, labels, {10 [500 100 50] 1 .80 100 1000});
+  % model = build_NN_NEW(data, labels, {10 [500 100 50] 1 .80 100 1000 .001 .5 .9});
   
-  lamb = .001; % regularization parameter. should eventually go to parameters
-  dropout_p = .5 % percent of nodes which are dropped out. should eventually go to parameters
+ 
+ 
   
   means = mean(double(data));
 
@@ -52,6 +58,7 @@ function model = build_NN_NEW(data, labels, parameters)
   for layer_i=1:L
     % initialize a random weight for each input and 0 for each bias
     if layer_i > 1
+      v{layer_i} = zeros(layers(layer_i-1), layers(layer_i));
       weights{layer_i} = normrnd(0, 1, [layers(layer_i-1), layers(layer_i)])*sqrt(2/layers(layer_i-1));
       biases{layer_i} = zeros(1, layers(layer_i));
     end
@@ -60,12 +67,9 @@ function model = build_NN_NEW(data, labels, parameters)
     delta{layer_i} = zeros(layers(layer_i), 1);
   end
 
-  %old_weights = weights;
   old_acc = 0;
   old_e = 0;
-  
-  %c = onCleanup(@()clean(weights, biases));
-  
+    
   epoch_count = 0;
   for epoch_i=1:epoch_num
     "\n"
@@ -85,7 +89,7 @@ function model = build_NN_NEW(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+        dropout_mask = (rand(size(z{layer_i})) > dropout_p) ;%/ dropout_p;
         z{layer_i} = z{layer_i}.*dropout_mask;
         activation{layer_i} = relu(z{layer_i});
       end
@@ -106,7 +110,9 @@ function model = build_NN_NEW(data, labels, parameters)
       
       % update weights and biases
       for layer_i=2:L
-        weights{layer_i} = weights{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
+        % update weights with momentum term
+        %v{layer_i} = mu*v{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
+        weights{layer_i} = weights{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};%+ v{layer_i};
         biases{layer_i} = biases{layer_i} - (learning_rate/batch_size)*batch_biases{layer_i};
       end
       % diff = weights{2} - old_weights{2}
@@ -145,6 +151,15 @@ function model = build_NN_NEW(data, labels, parameters)
       break
     end
 
+    % annealing
+    if e_diff > -.00001
+      learning_rate = learning_rate-.1
+      mu = mu + (1-mu)/2
+      if learning_rate <= 0
+        break
+      end
+    end
+    
     %sum(sum(abs(weights{2}-old_weights{2})))
     %sum(sum(abs(weights{3}-old_weights{3})))
     %sum(sum(abs(weights{4}-old_weights{4})))
@@ -154,7 +169,7 @@ function model = build_NN_NEW(data, labels, parameters)
   end
   
   model = {weights biases {means}};
-  beep
+  parameters
   
 end
 
