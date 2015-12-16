@@ -11,6 +11,8 @@ function model = build_GNB(data, labels, parameters)
     if length(parameters) > 0
       preprocess_parameters = parameters{1};
       augment = parameters{2};
+    else
+      augment = true;
     end
     
     if augment

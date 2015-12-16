@@ -40,7 +40,7 @@ function model = build_NN_NEW(data, labels, parameters)
 
   % set up data
   if augment
-      data = [data; flipLR(data)]
+      data = [data; flipLR(data)];
       labels = [labels; labels];
   end
   

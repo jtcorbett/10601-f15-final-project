@@ -9,9 +9,6 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         normalize = parameters{2};
         dimensions = parameters{3};
         whiten = parameters{4};
-    else
-        disp 'invalid number of args'; fflush(stdout);
-        return;
     end
     
     REBUILD = length(recreate_parameters) == 0;
