@@ -1,4 +1,4 @@
-function [data params U S] = calc_params_PCA(features, feature_parameters, U, S)
+function [data params] = calc_params_PCA(features, feature_parameters)
     if length(feature_parameters) == 0
         dimensions = 100;
         normalize = 0;
@@ -22,9 +22,9 @@ function [data params U S] = calc_params_PCA(features, feature_parameters, U, S)
         data = data ./ population_std;
     end
 
-    % disp 'computing covar mat'; fflush(stdout);
-    % covar = cov(data);
-    % [U, S, ~] = svd(covar);
+    disp 'computing covar mat'; fflush(stdout);
+    covar = cov(data);
+    [U, S, ~] = svd(covar);
 
     disp 'PCA analysis'; fflush(stdout);
     dimensions = min(dimensions,size(U,2));
