@@ -42,6 +42,7 @@ function [pca_reduced] = convert_PCA(features, feature_parameters, population_pa
     else
         covar = cov(data);
         [U, S, ~] = svd(covar);
+        S = diag(S)';
         S = sqrt(S(:,1:dimensions) + 1.0e-50);
         dimensions = min(dimensions,size(U,2));
         U = U(:,1:dimensions);
@@ -52,6 +53,6 @@ function [pca_reduced] = convert_PCA(features, feature_parameters, population_pa
 
     if whiten
         disp 'Whitening'; fflush(stdout);
-        pca_reduced = pca_reduced / S;
+        pca_reduced = pca_reduced ./ S;
     end
 end

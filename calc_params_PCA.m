@@ -1,4 +1,4 @@
-function [data params] = calc_params_PCA(features, feature_parameters)
+function [data params U S] = calc_params_PCA(features, feature_parameters, U, S)
     if length(feature_parameters) == 0
         dimensions = 100;
         normalize = 0;
@@ -8,7 +8,7 @@ function [data params] = calc_params_PCA(features, feature_parameters)
         normalize = feature_parameters{2};
         whiten = feature_parameters{3};
     else
-        disp 'invalid number of args';
+        disp 'invalid number of args'; fflush(stdout);
         return;
     end
 
@@ -17,26 +17,26 @@ function [data params] = calc_params_PCA(features, feature_parameters)
 
     population_std = 0;
     if normalize
-        disp 'normalizing';
+        disp 'normalizing'; fflush(stdout);
         population_std = std(data);
         data = data ./ population_std;
     end
 
-    disp 'computing covar mat';
-    covar = cov(data)
-    size(data)
-    [U, S, ~] = svd(covar);
+    % disp 'computing covar mat'; fflush(stdout);
+    % covar = cov(data);
+    % [U, S, ~] = svd(covar);
 
-    disp 'PCA analysis';
+    disp 'PCA analysis'; fflush(stdout);
     dimensions = min(dimensions,size(U,2));
     population_U = U(:,1:dimensions);
     data = data * population_U;
 
     population_white = 0;
     if whiten
-        disp 'Whitening';
-        population_white = sqrt(S(:,1:dimensions) + 1.0e-50);
-        data = data / population_white;
+        disp 'Whitening'; fflush(stdout);
+        S = diag(S)';
+        population_white = sqrt(S(1:dimensions) + 1.0e-50);
+        data = data ./ population_white;
     end
 
     params = {population_mean population_std population_U population_white};
