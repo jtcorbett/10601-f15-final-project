@@ -36,7 +36,7 @@ function model = build_NN_NEW(data, labels, parameters)
     augment = parameters{11};
   end
 
-  % model = build_NN_NEW(data, labels, {10 [500 100 50] 1 .80 100 1000 .001 .5 .1 {} true});
+  % model = build_NN_NEW(td, tl, {10 [500 100 50] 1 .80 100 1000 .001 .5 .1 {} true});
 
   % set up data
   if augment

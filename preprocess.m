@@ -4,13 +4,11 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         normalize = 1;
         dimensions = 1000;
         whiten = 1;
-        augment = 1;
-    elseif length(parameters) == 3
+    elseif length(parameters) == 4
         HSV = parameters{1};
         normalize = parameters{2};
         dimensions = parameters{3};
         whiten = parameters{4};
-        augment = parameters{5};
     else
         disp 'invalid number of args'; fflush(stdout);
         return;
@@ -70,11 +68,11 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         disp 'Whitening'; fflush(stdout);
         if REBUILD && dimensions > 0
           S = diag(S)';
-          population_white = sqrt(S(1:dimensions) + 1.0e-50);
+          population_whiten = sqrt(S(1:dimensions) + 1.0e-50);
         end
-        data = data ./ population_white;
+        data = data ./ population_whiten;
     end
 
     preprocessed_data = data;
-    preprocess_params = {population_mean population_std population_U population_white};
+    preprocess_params = {population_mean population_std population_U population_whiten};
 end
