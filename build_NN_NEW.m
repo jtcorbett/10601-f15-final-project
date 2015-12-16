@@ -130,7 +130,7 @@ function model = build_NN_NEW(data, labels, parameters)
     good = zeros(1, eval_size);
     e = 0;
     for sample_i=1:eval_size
-      output = feedforward({weights biases {means}}, eval_data(sample_i, :));
+      output = feedforward(eval_data(sample_i, :), weights, biases);
       % if sample_i == 1 output end
       answ = eval_labels(sample_i);
       e = e + softmax_loss(classes, output, answ+1);
