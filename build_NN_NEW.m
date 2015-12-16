@@ -97,12 +97,11 @@ function model = build_NN_NEW(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        z{layer_i} = z{layer_i};
-        activation{layer_i} = relu(z{layer_i});
         if dropout_p > 0
           dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
-          activation{layer_i} = activation{layer_i}.*dropout_mask;
+          z{layer_i} = z{layer_i}.*dropout_mask;
         end
+        activation{layer_i} = relu(z{layer_i});
       end
       output = sftprobs(z{L});
       as(round(batch_start/batch_size)+1) = mean(sum(output==max(output,{},2).*batch_answer, 2));
@@ -150,23 +149,22 @@ function model = build_NN_NEW(data, labels, parameters)
     acc = sum(good)/eval_size
     e
 
-    acc_diff = acc - old_acc
     old_acc = acc;
     e_diff = e - old_e
     old_e = e;
     
-    if acc > acc_thresh
+    if acc_internal > acc_thresh
       break
     end
 
     % annealing
-    %if e_diff > -.00001
-    %  learning_rate = learning_rate-.1
-    %  mu = mu/2
-    %  if learning_rate <= 0
-    %    break
-    %  end
-    %end
+    if mod(epoch_i, 50) == 1
+      learning_rate = learning_rate*.5;
+      mu = (mu + 1-mu)/3;
+      if learning_rate <= 0.001
+        break
+      end
+    end
     
     %sum(sum(abs(weights{2}-old_weights{2})))
     %sum(sum(abs(weights{3}-old_weights{3})))
