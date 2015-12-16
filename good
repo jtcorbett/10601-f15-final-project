@@ -1,0 +1,1 @@
+model = build_NN_NEW(td, tl, {10 [1000] .1 .99 10 100 .0001 0 0 {0 1 0 0} false});
