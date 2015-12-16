@@ -159,7 +159,7 @@ function model = build_NN_NEW(data, labels, parameters)
     % annealing
     if e_diff > -.00001
       learning_rate = learning_rate-.1
-      mu = mu + (1-mu)/2
+      mu = mu/2
       if learning_rate <= 0
         break
       end
