@@ -12,11 +12,12 @@ function model = build_GNB(data, labels, parameters)
       preprocess_parameters = parameters{1};
       augment = parameters{2};
     else
+      preprocess_parameters = {};
       augment = true;
     end
     
     if augment
-      data = [data; flipLR(data)]
+      data = [data; flipLR(data)];
       labels = [labels; labels];
     end
     

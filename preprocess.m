@@ -4,7 +4,7 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         normalize = 1;
         dimensions = 1000;
         whiten = 1;
-    elseif length(parameters) == 4
+    else
         HSV = parameters{1};
         normalize = parameters{2};
         dimensions = parameters{3};
