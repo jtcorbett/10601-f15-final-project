@@ -105,6 +105,7 @@ function model = build_NN_NEW(data, labels, parameters)
         end
       end
       output = sftprobs(z{L});
+      as(round(batch_start/batch_size)+1) = mean(sum(output==max(output,{},2).*batch_answer, 2));
       es(round(batch_start/batch_size)+1) = mean(-log(sum(output.*batch_answer, 2)));
       
       % calculate delta for each node for each layer
@@ -145,6 +146,7 @@ function model = build_NN_NEW(data, labels, parameters)
     %good
     
     e = mean(es) + reg_loss(weights, lamb);
+    acc_internal = mean(as)
     acc = sum(good)/eval_size
     e
 
