@@ -97,11 +97,15 @@ function model = build_NN_NEW(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
         z{layer_i} = z{layer_i};
-        activation{layer_i} = relu(z{layer_i}).*dropout_mask;
+        activation{layer_i} = relu(z{layer_i});
+        if dropout_p > 0
+          dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+          activation{layer_i} = activation{layer_i}.*dropout_mask;
+        end
       end
       output = sftprobs(z{L});
+      es(round(batch_start/batch_size)+1) = mean(-log(sum(output.*batch_answer, 2)));
       
       % calculate delta for each node for each layer
       deltas = cell(L, 1);
@@ -128,13 +132,11 @@ function model = build_NN_NEW(data, labels, parameters)
     
     % evaluate performance
     good = zeros(1, eval_size);
-    e = 0;
     for sample_i=1:eval_size
       output = feedforward(eval_data(sample_i, :), weights, biases);
       [M guess] = max(output);
       % if sample_i == 1 output end
       answ = eval_labels(sample_i);
-      e = e + softmax_loss(classes, output, answ);
       if guess == answ
         good(sample_i) = 1;
         % "right"
@@ -143,7 +145,7 @@ function model = build_NN_NEW(data, labels, parameters)
     end
     %good
     
-    e = e/eval_size + reg_loss(weights, lamb);
+    e = mean(es) + reg_loss(weights, lamb);
     acc = sum(good)/eval_size
     e
 
@@ -204,8 +206,7 @@ function err = hinge_loss(c, output, answ)
 end
 
 function err = softmax_loss(c, output, answ)
-  probs = sftprobs(output);
-  err = -log(probs(answ));
+  err = -log(output(answ));
 end
 
 function err = reg_loss(w, lamb)
