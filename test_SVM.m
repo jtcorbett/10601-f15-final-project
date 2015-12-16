@@ -1,12 +1,13 @@
 %% test_SVM: Run an SVM classifier
 function category = test_SVM(model, test_data)
+    test_data = double(test_data);
     N = size(test_data,1);
     category = -inf(N, length(model));
     offset = model{1};
     singleclass_svm_models = model{2};
 
     for model_i = 1:length(singleclass_svm_models)
-        model_i
+        epoch_label = model_i
         fflush(stdout);
 
         single_model = singleclass_svm_models{model_i};
@@ -22,6 +23,5 @@ end
 
 function scores = test_singleclass_svm(model, test_data)
     w = model{1};
-    b = model{2};
-    scores = sum((w .* test_data),2) + b;
+    scores = sum((w .* test_data),2);
 end

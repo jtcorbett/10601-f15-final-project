@@ -9,12 +9,17 @@ function svn_model = build_SVM(train_data, train_labels, parameters)
         return;
     end
 
+    train_data = double(train_data);
+    train_labels = double(train_labels);
+
     offset = 1 - min(train_labels);
     train_labels = train_labels + offset;
     features = unique(train_labels)';
     singleclass_svn_models = cell(size(features));
 
     for f = 1:length(features)
+        epoch_label = f
+        fflush(stdout);
         single_labels = 2*(train_labels==features(f))-1;
         singleclass_model = build_singleclass_SVM(train_data, single_labels, C);
         singleclass_svn_models{f} = {features(f) singleclass_model};
@@ -28,12 +33,16 @@ function singleclass_svn_model = build_singleclass_SVM(train_data, train_labels,
     N = length(train_labels);
     H = (train_labels * train_labels') .* (train_data * train_data');
     f = -ones(N,1);
+    tic();
     alpha = qp([],H,f,train_labels',0,zeros(N,1),C*ones(N,1));
+    toc();
     w = sum((alpha .* train_labels) .* train_data);
-    b = 0;
     S_i = find(alpha>0)';
     b = sum(train_labels(S_i) - sum((alpha(S_i)' .* train_labels(S_i)') .* H(S_i,S_i),2))/sum(alpha>0);
-    singleclass_svn_model = {w b};
+    singleclass_svn_model = {w};
+
+    % uncomment to include the constant offest in the model
+    % singleclass_svn_model = {w b};
 end
 
 % kernal for X, only guarenteed to work for positive values
