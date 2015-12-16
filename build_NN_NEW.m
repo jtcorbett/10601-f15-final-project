@@ -9,7 +9,7 @@ function model = build_NN_NEW(data, labels, parameters)
     eval_size = 100;
     lamb = .001; % regularization parameter
     dropout_p = .5 % percent of nodes which are dropped out
-    mu = .9 % friction for momentum
+    mu = .5 % friction for momentum
   else
     classes = parameters{1};
     hidden_layers = parameters{2};
@@ -81,17 +81,14 @@ function model = build_NN_NEW(data, labels, parameters)
       batch_data = data(idx(batch_start:batch_start+batch_size), :);
       batch_labels = labels(idx(batch_start:batch_start+batch_size), :);
       batch_answer = make_ans(classes, batch_labels);
-    
-      %features = batch_data(sample_i, :);
-      %answer = make_ans(classes, batch_labels(sample_i));
-      
+          
       % calculate output for each node for each layer
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        dropout_mask = (rand(size(z{layer_i})) > dropout_p) ;%/ dropout_p;
-        z{layer_i} = z{layer_i}.*dropout_mask;
-        activation{layer_i} = relu(z{layer_i});
+        dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+        z{layer_i} = z{layer_i};
+        activation{layer_i} = relu(z{layer_i}).*dropout_mask;
       end
       output = sftprobs(z{L});
       
@@ -111,8 +108,8 @@ function model = build_NN_NEW(data, labels, parameters)
       % update weights and biases
       for layer_i=2:L
         % update weights with momentum term
-        %v{layer_i} = mu*v{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
-        weights{layer_i} = weights{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};%+ v{layer_i};
+        v{layer_i} = mu*v{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
+        weights{layer_i} = weights{layer_i} - v{layer_i};
         biases{layer_i} = biases{layer_i} - (learning_rate/batch_size)*batch_biases{layer_i};
       end
       % diff = weights{2} - old_weights{2}
