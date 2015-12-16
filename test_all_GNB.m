@@ -3,8 +3,10 @@ function category = test_all_GNB(model, data)
     prior = model{2};
     mu = model{3};
     stdevs = model{4};
+    preprocess_parameters = model{5};
+    redo_preprocess = model{6};
 
-    data = double(data);
+    data = preprocess(data, preprocess_parameters, redo_preprocess);
     
     [num_labels, num_features] = size(mu);
     

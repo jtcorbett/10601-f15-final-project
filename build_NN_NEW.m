@@ -9,7 +9,9 @@ function model = build_NN_NEW(data, labels, parameters)
     eval_size = 100;
     lamb = .001; % regularization parameter
     dropout_p = .5 % percent of nodes which are dropped out
-    mu = .5 % friction for momentum
+    mu = .1 % friction for momentum
+    preprocess_params = {};
+    augment = true;
   else
     classes = parameters{1};
     hidden_layers = parameters{2};
@@ -28,21 +30,30 @@ function model = build_NN_NEW(data, labels, parameters)
       eval_size = size(data, 1);
     end
     lamb = parameters{7}; % regularization parameter
-    dropout_p = parameters{8} % percent of nodes which are dropped out
-    mu = parameters{9} % friction for momentum
+    dropout_p = parameters{8}; % percent of nodes which are dropped out
+    mu = parameters{9}; % friction for momentum
+    preprocess_params = parameters{10};
+    augment = parameters{11};
   end
 
-  % model = build_NN_NEW(data, labels, {10 [500 100 50] 1 .80 100 1000 .001 .5 .9});
-  
- 
- 
-  
-  means = mean(double(data));
+  % model = build_NN_NEW(data, labels, {10 [500 100 50] 1 .80 100 1000 .001 .5 .1 {} true});
 
-  original_data = double(data);  
-  data = (double(data)-means)/127.0; % normalize data
-  original_labels = labels;
+  % set up data
+  if augment
+      data = [data; flipLR(data)]
+      labels = [labels; labels];
+  end
+  
+  [data, recreate_parameters] = preprocess(data, parameters, {}); % normalize data
   labels = labels + 1; % octave likes things to be 1-indexed
+  
+  % separate out some data for evaluation
+  idx = randperm(size(data, 1));
+  eval_data = data(idx(1:eval_size), :);
+  eval_labels = labels(idx(1:eval_size), 1);
+  data = data(idx(eval_size+1:end), :);
+  labels = labels(idx(eval_size+1:end), 1);
+
   
   layers = horzcat([size(data, 2)], hidden_layers, [classes]);
   L = size(layers, 2); % number of layers (besides input)
@@ -109,21 +120,17 @@ function model = build_NN_NEW(data, labels, parameters)
       for layer_i=2:L
         % update weights with momentum term
         v{layer_i} = mu*v{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
-        weights{layer_i} = weights{layer_i} - v{layer_i};
+        weights{layer_i} = weights{layer_i} + v{layer_i};
         biases{layer_i} = biases{layer_i} - (learning_rate/batch_size)*batch_biases{layer_i};
       end
       % diff = weights{2} - old_weights{2}
     end
     
     % evaluate performance
-    idx = 1:size(data, 1);%randperm(size(data, 1));
-    eval_data = original_data(idx(1:eval_size), :);
-    eval_labels = original_labels(idx(1:eval_size), 1);
     good = zeros(1, eval_size);
     e = 0;
     for sample_i=1:eval_size
-      %out = test_NN({weights biases}, eval_data(sample_i, :))
-      [guess output] = test_NN({weights biases {means}}, eval_data(sample_i, :));
+      output = feedforward({weights biases {means}}, eval_data(sample_i, :));
       % if sample_i == 1 output end
       answ = eval_labels(sample_i);
       e = e + softmax_loss(classes, output, answ+1);
@@ -165,7 +172,7 @@ function model = build_NN_NEW(data, labels, parameters)
     fflush(stdout);
   end
   
-  model = {weights biases {means}};
+  model = {weights biases preprocess_params recreate_parameters};
   parameters
   
 end
