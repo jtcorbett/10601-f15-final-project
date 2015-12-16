@@ -7,9 +7,9 @@ function category = test_all_GNB(model, data)
     redo_preprocess = model{6};
 
     data = preprocess(data, preprocess_parameters, redo_preprocess);
-    
-    [num_labels, num_features] = size(mu);
-    
+
+    [num_labels, num_features] = size(mu)
+
     category = 1;
     max_p = -inf;
 
@@ -22,9 +22,9 @@ function category = test_all_GNB(model, data)
             p(:, label_i) = p(:, label_i) + max(log(normpdf(data(:, feat_i), mu(label_i,feat_i), stdevs(label_i,feat_i))),-1e250);
         end
     end
-    
+
     [M category] = max(p, [], 2);
 
     category = category - offset;
-   
+
 end

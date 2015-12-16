@@ -15,14 +15,14 @@ function model = build_GNB(data, labels, parameters)
       preprocess_parameters = {};
       augment = true;
     end
-    
+
     if augment
       data = [data; flipLR(data)];
       labels = [labels; labels];
     end
-    
+
     [data redo_preprocess] = preprocess(data, preprocess_parameters, {});
-    
+
     % calculate priors
     prior = zeros(size(unique_labels));
 
@@ -34,8 +34,8 @@ function model = build_GNB(data, labels, parameters)
       mu(label, :) = mean(data(find(labels==label), :), 1);
       variance_mat(label, :) = var(data(find(labels==label), :), 0, 1);
     end
-    
+
     stdevs = sqrt(variance_mat);
-    
+
     model = {offset, prior, mu, stdevs, preprocess_parameters, redo_preprocess};
 end

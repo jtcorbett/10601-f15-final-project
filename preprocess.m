@@ -10,7 +10,7 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         dimensions = parameters{3};
         whiten = parameters{4};
     end
-    
+
     REBUILD = length(recreate_parameters) == 0;
     if length(recreate_parameters) == 4
         population_mean = recreate_parameters{1};
@@ -28,18 +28,22 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
     end
 
     data = double(data);
-    
+
+
+    % size(data)
     if HSV
       for sample_i=1:size(data, 1)
         data(sample_i, :) = convert_HSV(data(sample_i, :), {});
       end
     end
-    
+
+    % size(data)
     if REBUILD
       population_mean = mean(data);
     end
     data = double(data) - population_mean;
 
+    % size(data)
     if normalize
         disp 'normalizing'; fflush(stdout);
         if REBUILD
@@ -48,6 +52,7 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         data = data ./ population_std;
     end
 
+    % size(data)
     if dimensions > 0
       if REBUILD
           disp 'computing covar mat'; fflush(stdout);
@@ -60,7 +65,8 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
       end
       data = data * population_U;
     end
-    
+
+    % size(data)
     if whiten
         disp 'Whitening'; fflush(stdout);
         if REBUILD && dimensions > 0
@@ -70,6 +76,7 @@ function [preprocessed_data preprocess_params] = preprocess(data, parameters, re
         data = data ./ population_whiten;
     end
 
+    % size(data)
     preprocessed_data = data;
     preprocess_params = {population_mean population_std population_U population_whiten};
 end
