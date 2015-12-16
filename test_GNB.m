@@ -2,22 +2,26 @@ function category = test_GNB(model, features)
     offset = model{1};
     prior = model{2};
     mu = model{3};
-    variance_mat = model{4};
+    stdevs = model{4};
 
-    num_features = length(features);
-    num_labels = length(prior);
-
+    features = double(features);
+    
+    [num_labels, num_features] = size(mu);
+    
     category = 1;
     max_p = -inf;
 
-    for j = 1:num_labels
-        p = log(prior(j));
-        for i = 1:num_features
-            p = p + max(log(normpdf(double(features(i)),mu(i,j),variance_mat(i,j))),-1e250);
+
+    for label_i = 1:num_labels
+        label_i
+        fflush(stderr);
+        p = log(prior(label_i));
+        for feat_i = 1:num_features
+            p = p + max(log(normpdf(features(feat_i), mu(label_i,feat_i), stdevs(label_i,feat_i))),-1e250);
         end
 
         if p > max_p
-            category = j;
+            category = label_i;
             max_p = p;
         end
     end

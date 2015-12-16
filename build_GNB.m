@@ -14,26 +14,12 @@ function model = build_GNB(data, labels, parameters)
         prior(label) = sum(labels==label)/labels_length;
     end
 
-    mu = zeros(num_features,num_labels);
-    variance_mat = zeros(num_features,num_labels);
-
-    for i = 1:num_features
-        for j = 1:num_labels
-
-            % calculate mean
-            mu(i,j) = 1/sum(labels==j) * sum(data(find(labels==j),i));
-
-            % calculate variance
-            for n = 1:labels_length
-                if labels(n) == j
-                    variance_mat(i,j) = variance_mat(i,j) + (data(n,i) - mu(i,j))^2;
-                end
-            end
-
-            % normalize variance and convert to std. dev.
-            variance_mat(i,j) = sqrt(variance_mat(i,j)/sum(labels==j));
-        end
+    for label=min(unique_labels):max(unique_labels)
+      mu(label, :) = mean(data(find(labels==label), :), 1);
+      variance_mat(label, :) = var(data(find(labels==label), :), 0, 1);
     end
-
-    model = {offset, prior, mu, variance_mat};
+    
+    stdevs = sqrt(variance_mat)
+    
+    model = {offset, prior, mu, stdevs};
 end
