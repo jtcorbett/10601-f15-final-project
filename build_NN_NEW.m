@@ -105,6 +105,7 @@ function model = build_NN_NEW(data, labels, parameters)
         end
       end
       output = sftprobs(z{L});
+      as(round(batch_start/batch_size)+1) = mean(sum(output==max(output,{},2).*batch_answer, 2));
       es(round(batch_start/batch_size)+1) = mean(-log(sum(output.*batch_answer, 2)));
       
       % calculate delta for each node for each layer
@@ -127,7 +128,6 @@ function model = build_NN_NEW(data, labels, parameters)
         weights{layer_i} = weights{layer_i} + v{layer_i};
         biases{layer_i} = biases{layer_i} - (learning_rate/batch_size)*batch_biases{layer_i};
       end
-      % diff = weights{2} - old_weights{2}
     end
     
     % evaluate performance
@@ -146,6 +146,7 @@ function model = build_NN_NEW(data, labels, parameters)
     %good
     
     e = mean(es) + reg_loss(weights, lamb);
+    acc_internal = mean(as)
     acc = sum(good)/eval_size
     e
 
@@ -159,13 +160,13 @@ function model = build_NN_NEW(data, labels, parameters)
     end
 
     % annealing
-    if e_diff > -.00001
-      learning_rate = learning_rate-.1
-      mu = mu/2
-      if learning_rate <= 0
-        break
-      end
-    end
+    %if e_diff > -.00001
+    %  learning_rate = learning_rate-.1
+    %  mu = mu/2
+    %  if learning_rate <= 0
+    %    break
+    %  end
+    %end
     
     %sum(sum(abs(weights{2}-old_weights{2})))
     %sum(sum(abs(weights{3}-old_weights{3})))
@@ -187,11 +188,11 @@ function ans = sigmf(x)
 end
 
 function ans = relu(x)
-  ans = (x > 0).*x;
+  ans = (x >= 0).*x + (x < 0).*x*.01;
 end
 
 function ans = reludiff(x)
-  ans = double(x > 0);
+  ans = double(x >= 0) + double(x < 0)*.01;
 end
 
 function err = entropy_loss(c, output, answ)
