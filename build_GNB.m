@@ -19,7 +19,7 @@ function model = build_GNB(data, labels, parameters)
       variance_mat(label, :) = var(data(find(labels==label), :), 0, 1);
     end
     
-    stdevs = sqrt(variance_mat)
+    stdevs = sqrt(variance_mat);
     
     model = {offset, prior, mu, stdevs};
 end

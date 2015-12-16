@@ -13,8 +13,6 @@ function category = test_GNB(model, features)
 
 
     for label_i = 1:num_labels
-        label_i
-        fflush(stderr);
         p = log(prior(label_i));
         for feat_i = 1:num_features
             p = p + max(log(normpdf(features(feat_i), mu(label_i,feat_i), stdevs(label_i,feat_i))),-1e250);
