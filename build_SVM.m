@@ -34,7 +34,8 @@ function singleclass_svn_model = build_singleclass_SVM(train_data, train_labels,
     H = (train_labels * train_labels') .* (train_data * train_data');
     f = -ones(N,1);
     tic();
-    alpha = qp([],H,f,train_labels',0,zeros(N,1),C*ones(N,1));
+    % alpha = qp([],H,f,train_labels',0,zeros(N,1),C*ones(N,1));
+    alpha = qp([],H,f,train_labels',0,zeros(N,1),[]);
     toc();
     w = sum((alpha .* train_labels) .* train_data);
     S_i = find(alpha>0)';
