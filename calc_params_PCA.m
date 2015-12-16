@@ -1,4 +1,3 @@
-%% convert_PCA: Perform principal component analysis on the data
 function [data params] = calc_params_PCA(features, feature_parameters)
     if length(feature_parameters) == 0
         dimensions = 100;
@@ -15,7 +14,7 @@ function [data params] = calc_params_PCA(features, feature_parameters)
 
     population_mean = mean(features);
     data = double(features) - population_mean;
-    
+
     population_std = 0;
     if normalize
         disp 'normalizing';
@@ -31,14 +30,14 @@ function [data params] = calc_params_PCA(features, feature_parameters)
     disp 'PCA analysis';
     dimensions = min(dimensions,size(U,2));
     population_U = U(:,1:dimensions);
-    pca_reduced = data * population_U;
+    data = data * population_U;
 
     population_white = 0;
     if whiten
         disp 'Whitening';
         population_white = sqrt(S(:,1:dimensions) + 1.0e-50);
-        pca_reduced = pca_reduced / population_white;
+        data = data / population_white;
     end
-    
+
     params = {population_mean population_std population_U population_white};
 end

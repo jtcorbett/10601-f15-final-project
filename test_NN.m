@@ -3,14 +3,14 @@ function [category output] = test_NN(model, features)
   biases = model{2};
   preprocessing = model{3};
   means = preprocessing{1};
-  
+
   features = (double(features)-means)./127.0;
-  
+
   L = size(weights, 1);
-  
-  z = cell(L, 1);  
+
+  z = cell(L, 1);
   activation = cell(L, 1);
-  
+
   activation{1} = features;
   for layer_i=2:L
     z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'

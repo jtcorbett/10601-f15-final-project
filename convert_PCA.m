@@ -12,6 +12,7 @@ function [pca_reduced] = convert_PCA(features, feature_parameters, population_pa
         disp 'invalid number of args for feature_parameters'; fflush(stdout);
         return;
     end
+
     if length(population_parameters) == 4
         population_mean = population_parameters{1};
         population_std = population_parameters{2};
@@ -42,11 +43,12 @@ function [pca_reduced] = convert_PCA(features, feature_parameters, population_pa
         covar = cov(data);
         [U, S, ~] = svd(covar);
         S = sqrt(S(:,1:dimensions) + 1.0e-50);
+        dimensions = min(dimensions,size(U,2));
+        U = U(:,1:dimensions);
     end
 
     disp 'PCA analysis'; fflush(stdout);
-    dimensions = min(dimensions,size(U,2));
-    pca_reduced = data * U(:,1:dimensions);
+    pca_reduced = data * U;
 
     if whiten
         disp 'Whitening'; fflush(stdout);

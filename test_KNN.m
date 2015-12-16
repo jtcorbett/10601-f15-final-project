@@ -4,13 +4,22 @@ function category = test_KNN(model, features)
     N = size(features,1);
     training_data = model{2};
     training_labels = model{3};
-    F = max(training_labels) - min(training_labels) + 1;
     category = zeros(N,1);
 
-    % loop through each test feature
-    for f = 1:N
-        feature = features(f,:);
+    % loop through each test samples
+    for n = 1:N
+        epoch_i = n
+        fflush(stdout);
+
+        feature = features(n,:);
+
+        % Each row represents one neighbor.
+        % Col 1 is score for that neighbor.
+        % Col 2 is label of that neighbor.
         KNN = inf(K,2);
+
+        % max_k(1) is score of furthest NN.
+        % max_k(2) is index of furthest NN.
         max_k = [inf 1];
 
         % loop through each of the training samples
@@ -22,6 +31,6 @@ function category = test_KNN(model, features)
             end
         end
 
-        category(f) = mode(KNN(:,2));
+        category(n) = mode(KNN(:,2));
     end
 end
