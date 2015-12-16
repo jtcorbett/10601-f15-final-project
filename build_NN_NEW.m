@@ -134,7 +134,7 @@ function model = build_NN_NEW(data, labels, parameters)
       [M guess] = max(output);
       % if sample_i == 1 output end
       answ = eval_labels(sample_i);
-      e = e + softmax_loss(classes, output, answ+1);
+      e = e + softmax_loss(classes, output, answ);
       if guess == answ
         good(sample_i) = 1;
         % "right"
