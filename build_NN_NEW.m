@@ -44,7 +44,7 @@ function model = build_NN_NEW(data, labels, parameters)
       labels = [labels; labels];
   end
   
-  [data, recreate_parameters] = preprocess(data, parameters, {}); % normalize data
+  [data, recreate_parameters] = preprocess(data, preprocess_params, {}); % normalize data
   labels = labels + 1; % octave likes things to be 1-indexed
   
   % separate out some data for evaluation
