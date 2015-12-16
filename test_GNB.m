@@ -3,6 +3,7 @@ function category = test_GNB(model, features)
     prior = model{2};
     mu = model{3};
     stdevs = model{4};
+    preparams = model{4};
 
     features = double(features);
     

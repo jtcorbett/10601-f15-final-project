@@ -7,6 +7,22 @@ function model = build_GNB(data, labels, parameters)
     unique_labels = unique(labels);
     num_labels = length(unique_labels);
 
+    preprocess_parameters = {};
+    if length(parameters) > 0
+      preprocess_parameters = parameters{1};
+      augment = parameters{2};
+    else
+      preprocess_parameters = {};
+      augment = true;
+    end
+    
+    if augment
+      data = [data; flipLR(data)];
+      labels = [labels; labels];
+    end
+    
+    [data redo_preprocess] = preprocess(data, preprocess_parameters, {});
+    
     % calculate priors
     prior = zeros(size(unique_labels));
 
@@ -21,5 +37,5 @@ function model = build_GNB(data, labels, parameters)
     
     stdevs = sqrt(variance_mat);
     
-    model = {offset, prior, mu, stdevs};
+    model = {offset, prior, mu, stdevs, preprocess_parameters, redo_preprocess};
 end
