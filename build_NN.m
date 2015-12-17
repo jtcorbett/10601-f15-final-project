@@ -82,7 +82,7 @@ function model = build_NN(data, labels, parameters)
   old_e = 99999999;
     
   epoch_count = 0;
-  for epoch_i=1:epoch_num
+  for epoch_i=1:epoch_num 
     "\n"
     epoch_i
 
