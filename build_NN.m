@@ -72,8 +72,8 @@ function model = build_NN(data, labels, parameters)
       v{layer_i} = zeros(layers(layer_i-1), layers(layer_i));
       weights{layer_i} = normrnd(0, 1, [layers(layer_i-1), layers(layer_i)])*sqrt(2/layers(layer_i-1));
       biases{layer_i} = zeros(1, layers(layer_i));
+      z{layer_i} = zeros(1, layers(layer_i));
     end
-    z{layer_i} = zeros(layers(layer_i), 1);
     activation{layer_i} = zeros(layers(layer_i), 1);
     delta{layer_i} = zeros(layers(layer_i), 1);
   end
@@ -82,7 +82,7 @@ function model = build_NN(data, labels, parameters)
   old_e = 99999999;
     
   epoch_count = 0;
-  for epoch_i=1:epoch_num
+  for epoch_i=1:epoch_num 
     "\n"
     epoch_i
   
@@ -97,11 +97,11 @@ function model = build_NN(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        if dropout_p > 0
-          dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
-          z{layer_i} = z{layer_i}.*dropout_mask;
-        end
         activation{layer_i} = relu(z{layer_i});
+        if dropout_p > 0
+          dropout_mask{layer_i} = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+          activation{layer_i} = activation{layer_i}.*dropout_mask{layer_i};
+        end
       end
       output = sftprobs(z{L});
       as(round(batch_start/batch_size)+1) = mean(sum(output==max(output,{},2).*batch_answer, 2));
@@ -158,7 +158,7 @@ function model = build_NN(data, labels, parameters)
     end
 
     % annealing
-    if mod(epoch_i, 10) == 1
+    if mod(epoch_i, 20) == 0
       learning_rate = learning_rate*.5;
       %mu = (mu + 1-mu)/3;
       if learning_rate <= 0.00001
