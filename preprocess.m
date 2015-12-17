@@ -29,8 +29,6 @@ function [preprocessed_data preprocess_params] = preprocess(original_data, param
         population_whiten = 1;
     end
 
-    data = double(data);
-
     if HSV
       for sample_i=1:size(original_data, 1)
         data(sample_i, :) = convert_HSV(original_data(sample_i, :), {});

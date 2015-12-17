@@ -1,4 +1,4 @@
-function feat = convert_VLFeat(image, feature_parameters)
+function feat = convert_HOG(image, feature_parameters)
 %% Description
 % This function takes one image as input and returns HOG feature.
 %
@@ -13,19 +13,28 @@ function feat = convert_VLFeat(image, feature_parameters)
 % VLFeat must be added to MATLAB search path. Please check the link below.
 % http://www.vlfeat.org/install-matlab.html
 
+R = reshape(image(1:1024),32,32);
+G = reshape(image(1+1024:2*1024),32,32);
+B = reshape(image(1+2*1024:3*1024),32,32);
+final_img(:,:,1) = R;
+final_img(:,:,2) = G;
+final_img(:,:,3) = B;
 
 %% check input data type
-if ~isa(image, 'single'), image = single(image); end;
+if ~isa(final_img, 'single'), final_img = single(final_img); end;
 
+if length(feature_parameters) == 0
+    cellSize = 8;
+else
+    cellSize = feature_parameters{1};
+end
 
 %% extract HOG
-cellSize = 8;
-hog = vl_hog(image, cellSize);
-imhog = vl_hog('render', hog);
-clf; imagesc(imhog); colormap gray;
+hog = vl_hog(final_img, cellSize);
+% imhog = vl_hog('render', hog);
+% clf; imagesc(imhog); colormap gray;
 
 
 %% feature - vectorized HOG descriptor
 feat = hog(:);
-
 end
