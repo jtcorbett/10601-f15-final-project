@@ -7,6 +7,11 @@ function model = build_NN(data, labels, parameters)
     epoch_num = 20;
     batch_size = 100;
     eval_size = 100;
+    lamb = .001; % regularization parameter
+    dropout_p = .5 % percent of nodes which are dropped out
+    mu = .1 % friction for momentum
+    preprocess_params = {};
+    augment = true;
   else
     classes = parameters{1};
     hidden_layers = parameters{2};
@@ -16,7 +21,7 @@ function model = build_NN(data, labels, parameters)
       epoch_num = parameters{4};
     else
       acc_thresh = parameters{4};
-      epoch_num = 1000;
+      epoch_num = 100;
     end
     batch_size = parameters{5};
     if parameters{6} > 0
@@ -24,45 +29,58 @@ function model = build_NN(data, labels, parameters)
     else
       eval_size = size(data, 1);
     end
+    lamb = parameters{7}; % regularization parameter
+    dropout_p = parameters{8}; % percent of nodes which are dropped out
+    mu = parameters{9}; % friction for momentum
+    preprocess_params = parameters{10};
+    augment = parameters{11};
   end
 
-  lamb = .9; % regularization parameter. should eventually go to parameters
+  % model = build_NN_NEW(td, tl, {10 [500 100 50] 1 .80 100 1000 .001 .5 .1 {} true});
+
+  % set up data
+  if augment
+      data = [data; flipLR(data)];
+      labels = [labels; labels];
+  end
   
-  means = mean(double(data));
-  
-  data = (double(data)-means)/127.0; % normalize data
+  [data, recreate_parameters] = preprocess(data, preprocess_params, {}); % normalize data
   labels = labels + 1; % octave likes things to be 1-indexed
+  
+  % separate out some data for evaluation
+  idx = randperm(size(data, 1));
+  eval_data = data(idx(1:eval_size), :);
+  eval_labels = labels(idx(1:eval_size), 1);
+  data = data(idx(eval_size+1:end), :);
+  labels = labels(idx(eval_size+1:end), 1);
+
   
   layers = horzcat([size(data, 2)], hidden_layers, [classes]);
   L = size(layers, 2); % number of layers (besides input)
   N = size(data, 1);
 
   weights = cell(L, 1);
-  best_weights = cell(L, 1);
   batch_weights = cell(L, 1);
   biases = cell(L, 1);
-  best_biases = cell(L, 1);
   batch_biases = cell(L, 1);
   activation = cell(L, 1);
-  output = cell(L, 1);
+  z = cell(L, 1);
   deltas = cell(L, 1);
   for layer_i=1:L
     % initialize a random weight for each input and 0 for each bias
     if layer_i > 1
-      weights{layer_i} = normrnd(0, 1, [layers(layer_i), layers(layer_i-1)])*sqrt(2/layers(layer_i-1));
+      v{layer_i} = zeros(layers(layer_i-1), layers(layer_i));
+      weights{layer_i} = normrnd(0, 1, [layers(layer_i-1), layers(layer_i)])*sqrt(2/layers(layer_i-1));
+      biases{layer_i} = zeros(1, layers(layer_i));
     end
-    biases{layer_i} = zeros([layers(layer_i), 1]);
     z{layer_i} = zeros(layers(layer_i), 1);
-    output{layer_i} = zeros(layers(layer_i), 1);
+    activation{layer_i} = zeros(layers(layer_i), 1);
     delta{layer_i} = zeros(layers(layer_i), 1);
   end
 
-  %old_weights = weights;
   old_acc = 0;
-  old_e = 0;
-  
-  %c = onCleanup(@()clean(weights, biases));
-  
+  old_e = 99999999;
+    
   epoch_count = 0;
   for epoch_i=1:epoch_num
     "\n"
@@ -73,61 +91,52 @@ function model = build_NN(data, labels, parameters)
     for batch_start=1:batch_size:size(data, 1)-batch_size
       batch_data = data(idx(batch_start:batch_start+batch_size), :);
       batch_labels = labels(idx(batch_start:batch_start+batch_size), :);
-
-      % reset deltas for batch vars
+      batch_answer = make_ans(classes, batch_labels);
+          
+      % calculate output for each node for each layer
+      activation{1} = batch_data;
       for layer_i=2:L
-        batch_weights{layer_i} = zeros(layers(layer_i), layers(layer_i-1));
-        batch_biases{layer_i} = zeros(layers(layer_i), 1);
-      end  
-    
-      % run one batch
-      for sample_i=1:batch_size
-        features = batch_data(sample_i, :);
-        answer = make_ans(classes, batch_labels(sample_i));
-       
-        
-        % calculate output for each node for each layer
-        activation{1} = features';
-        for layer_i=2:L
-          z{layer_i} = weights{layer_i}*activation{layer_i-1} + biases{layer_i}; %'
-          activation{layer_i} = relu(z{layer_i});
+        z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
+        if dropout_p > 0
+          dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+          z{layer_i} = z{layer_i}.*dropout_mask;
         end
-
-        % calculate delta for each node for each layer
-        deltas = cell(L, 1);
-        deltas{L} = (sftprobs(z{L})-answer);
-        for layer_i=L-1:-1:2
-          deltas{layer_i} = weights{layer_i+1}'*deltas{layer_i+1}.*reludiff(z{layer_i}); %'
-        end
-
-        % update batch weights and biases
-        for layer_i=2:L
-          batch_weights{layer_i} = batch_weights{layer_i} + (deltas{layer_i}*activation{layer_i-1}'); %'
-          batch_biases{layer_i} = batch_biases{layer_i} + deltas{layer_i};
-        end
+        activation{layer_i} = relu(z{layer_i});
+      end
+      output = sftprobs(z{L});
+      as(round(batch_start/batch_size)+1) = mean(sum(output==max(output,{},2).*batch_answer, 2));
+      es(round(batch_start/batch_size)+1) = mean(-log(sum(output.*batch_answer, 2)));
+      
+      % calculate delta for each node for each layer
+      deltas = cell(L, 1);
+      deltas{L} = (output-batch_answer)/batch_size;
+      for layer_i=L-1:-1:2
+        deltas{layer_i} = deltas{layer_i+1}*weights{layer_i+1}' .* reludiff(z{layer_i}); %'
       end
 
-      % update weights and biases
-      old_weights = weights;
+      % update batch weights and biases
       for layer_i=2:L
-        weights{layer_i} = weights{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
+        batch_weights{layer_i} = lamb*weights{layer_i} + (activation{layer_i-1}'*deltas{layer_i}); %'
+        batch_biases{layer_i} = sum(deltas{layer_i});
+      end
+      
+      % update weights and biases
+      for layer_i=2:L
+        % update weights with momentum term
+        v{layer_i} = mu*v{layer_i} - (learning_rate/batch_size)*batch_weights{layer_i};
+        weights{layer_i} = weights{layer_i} + v{layer_i};
         biases{layer_i} = biases{layer_i} - (learning_rate/batch_size)*batch_biases{layer_i};
       end
-      % diff = weights{2} - old_weights{2}
     end
     
     % evaluate performance
-    idx = 1:size(data, 1);%randperm(size(data, 1));
-    eval_data = data(idx(1:eval_size), :);
-    eval_labels = labels(idx(1:eval_size), 1);
     good = zeros(1, eval_size);
-    e = 0;
     for sample_i=1:eval_size
-      %out = test_NN({weights biases}, eval_data(sample_i, :))
-      [guess output] = test_NN({weights biases}, eval_data(sample_i, :));
-      ans = eval_labels(sample_i);
-      e = e + softmax_loss(classes, output, ans);
-      if guess == ans;
+      output = feedforward(eval_data(sample_i, :), weights, biases);
+      [M guess] = max(output);
+      % if sample_i == 1 output end
+      answ = eval_labels(sample_i);
+      if guess == answ
         good(sample_i) = 1;
         % "right"
         % sample_j
@@ -135,19 +144,28 @@ function model = build_NN(data, labels, parameters)
     end
     %good
     
-    e = e/eval_size + reg_loss(w, lamb);
+    e = mean(es) + reg_loss(weights, lamb);
+    acc_internal = mean(as)
     acc = sum(good)/eval_size
     e
 
-    acc_diff = acc - old_acc
     old_acc = acc;
     e_diff = e - old_e
     old_e = e;
     
-    if acc > acc_thresh
+    if acc_internal > acc_thresh
       break
     end
 
+    % annealing
+    if mod(epoch_i, 10) == 1
+      learning_rate = learning_rate*.5;
+      %mu = (mu + 1-mu)/3;
+      if learning_rate <= 0.00001
+        break
+      end
+    end
+    
     %sum(sum(abs(weights{2}-old_weights{2})))
     %sum(sum(abs(weights{3}-old_weights{3})))
     %sum(sum(abs(weights{4}-old_weights{4})))
@@ -156,8 +174,9 @@ function model = build_NN(data, labels, parameters)
     fflush(stdout);
   end
   
-  model = {weights biases {means}};
-
+  model = {weights biases preprocess_params recreate_parameters};
+  parameters
+  
 end
 
 nl = sigmf
@@ -167,33 +186,32 @@ function ans = sigmf(x)
 end
 
 function ans = relu(x)
-  ans = (x > 0).*x;
+  ans = (x >= 0).*x + (x < 0).*x*.01;
 end
 
 function ans = reludiff(x)
-  ans = double(x > 0);
+  ans = double(x >= 0) + double(x < 0)*.01;
 end
 
-function err = entropy_loss(c, output, ans)
-  t = make_ans(c, ans);
+function err = entropy_loss(c, output, answ)
+  t = make_ans(c, answ);
   err = sum(t.*log(output) + (1-t).*log(1-output));
 end
 
-function err = hinge_loss(c, output, ans)
-  diff = (output-output(ans+1))+1;
+function err = hinge_loss(c, output, answ)
+  diff = (output-output(answ+1))+1;
   diff = diff .* (diff > 0);
   err = sum(diff) - 1;
 end
 
-function err = softmax_loss(c, output, ans)
-  probs = sftprobs(output);
-  err = -log(probs(ans));
+function err = softmax_loss(c, output, answ)
+  err = -log(output(answ));
 end
 
 function err = reg_loss(w, lamb)
   err = 0;
   for i=1:size(w)
-    err = err + .5*lamb*sum(sum(w(i).*w(i)));
+    err = err + .5*lamb*sum(sum(w{i}.*w{i}));
   end
 end
 
@@ -201,14 +219,14 @@ function err = reg_gradient(w, lamb)
   err = lamb*w;
 end
 
-function ans = softmax_gradient(c, output, ans)
+function ans = softmax_gradient(c, output, answ)
   probs = sftprobs(output);
-  ans = probs - (make_ans(c, ans))';
+  ans = probs - (make_ans(c, answ))';
 end
 
 function probs = sftprobs(vec)
   expd = exp(vec);
-  probs = expd/sum(expd);;
+  probs = expd./sum(expd, 2);
 end
 
 function clean(weights, biases)
@@ -216,8 +234,9 @@ function clean(weights, biases)
   save('model.mat', 'model')
 end
 
-function t = make_ans(c, n)
-  t = zeros(c, 1);
-  t(n) = 1;
-  % t = t + (.5 .- t)*.2;
+function t = make_ans(c, labels)
+  t = zeros(size(labels,1), c);
+  for i=1:size(labels,1)
+    t(i, labels(i)) = 1;
+  end
 end
