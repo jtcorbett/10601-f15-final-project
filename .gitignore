@@ -3,4 +3,5 @@
 vlfeat*
 *cifar*
 *.mat
+*.tar
 octave-workspace
