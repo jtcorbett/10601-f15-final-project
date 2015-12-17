@@ -87,7 +87,7 @@ function model = build_NN(data, labels, parameters)
     epoch_i
 
     for layer_i=2:L
-      dropout_mask = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+      dropout_mask{layer_i} = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
     end  
   
     % take a random sample of data
@@ -102,7 +102,7 @@ function model = build_NN(data, labels, parameters)
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
         if dropout_p > 0
-          z{layer_i} = z{layer_i}.*dropout_mask;
+          z{layer_i} = z{layer_i}.*dropout_mask{layer_i};
         end
         activation{layer_i} = relu(z{layer_i});
       end
