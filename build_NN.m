@@ -158,7 +158,7 @@ function model = build_NN(data, labels, parameters)
     end
 
     % annealing
-    if mod(epoch_i, 10) == 1
+    if mod(epoch_i, 20) == 0
       learning_rate = learning_rate*.5;
       %mu = (mu + 1-mu)/3;
       if learning_rate <= 0.00001
