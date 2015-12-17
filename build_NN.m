@@ -87,7 +87,7 @@ function model = build_NN(data, labels, parameters)
     epoch_i
 
     for layer_i=2:L
-      dropout_mask{layer_i} = (rand(size(z{layer_i})) > dropout_p) / dropout_p;
+      dropout_mask{layer_i} = (rand(size(z{layer_i})) > dropout_p) ;%/ dropout_p;
     end  
   
     % take a random sample of data
@@ -101,10 +101,10 @@ function model = build_NN(data, labels, parameters)
       activation{1} = batch_data;
       for layer_i=2:L
         z{layer_i} = activation{layer_i-1}*weights{layer_i} + biases{layer_i}; %'
-        if dropout_p > 0
-          z{layer_i} = z{layer_i}.*dropout_mask{layer_i};
-        end
         activation{layer_i} = relu(z{layer_i});
+        if dropout_p > 0
+          activation{layer_i} = activation{layer_i}.*dropout_mask{layer_i};
+        end
       end
       output = sftprobs(z{L});
       as(round(batch_start/batch_size)+1) = mean(sum(output==max(output,{},2).*batch_answer, 2));
