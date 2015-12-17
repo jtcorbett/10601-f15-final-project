@@ -1,0 +1,4 @@
+addpath <absolute path to VLFEATROOT>
+cd VLFEATROOT/toolbox
+vl_setup
+
