@@ -72,8 +72,8 @@ function model = build_NN(data, labels, parameters)
       v{layer_i} = zeros(layers(layer_i-1), layers(layer_i));
       weights{layer_i} = normrnd(0, 1, [layers(layer_i-1), layers(layer_i)])*sqrt(2/layers(layer_i-1));
       biases{layer_i} = zeros(1, layers(layer_i));
+      z{layer_i} = zeros(1, layers(layer_i));
     end
-    z{layer_i} = zeros(layers(layer_i), 1);
     activation{layer_i} = zeros(layers(layer_i), 1);
     delta{layer_i} = zeros(layers(layer_i), 1);
   end
