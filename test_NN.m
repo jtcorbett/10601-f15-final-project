@@ -7,7 +7,7 @@ function [category] = test_NN(model, data)
   data = preprocess(data, preprocess_params, recreate_params);
 
   for input_i=1:size(data, 1)
-    output = feedforward(data(input_i, :), weights, biases)
+    output = feedforward(data(input_i, :), weights, biases);
     [M I] = max(output);
     category(input_i, 1) = I;
   end

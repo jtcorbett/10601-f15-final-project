@@ -47,7 +47,7 @@ function [preprocessed_data preprocess_params] = preprocess(original_data, param
     data = double(data) - population_mean;
 
     if normalize
-        disp 'normalizing'; fflush(stdout);
+        
         if REBUILD
           population_std = std(data);
         end
@@ -68,7 +68,6 @@ function [preprocessed_data preprocess_params] = preprocess(original_data, param
     end
 
     if whiten
-        disp 'Whitening'; fflush(stdout);
         if REBUILD && dimensions > 0
           S = diag(S)';
           population_whiten = sqrt(S(1:dimensions) + 1.0e-50);

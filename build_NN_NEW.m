@@ -159,7 +159,7 @@ function model = build_NN_NEW(data, labels, parameters)
 
     % annealing
     if mod(epoch_i, 10) == 1
-      learning_rate = learning_rate*.5;
+      learning_rate = learning_rate*.5
       %mu = (mu + 1-mu)/3;
       if learning_rate <= 0.00001
         break

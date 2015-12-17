@@ -18,3 +18,5 @@ model = build_NN_NEW(hog_train_data, traing_labels, {10 [1000 500 250] .1 100 10
 % success story
 model = build_NN_NEW(hog_train_data, train_labels, {10 [1000 500 250] .1 .95 10 100 .05 0 0 {0 1 0 0} false});
 
+% best so far
+model = build_NN_NEW(hog_train_data, train_labels, {10 [100 250 100 50] .05 .95 10 100 .04 0 0 {0 1 100 0 0} false});
