@@ -35,7 +35,7 @@ function category = test_KNN(model, data)
 
         [M F C] = mode(KNN(:,2));
         C = C{1};
-        if length(C) == 1 || true
+        if length(C) == 1
             category(n) = M;
         else
             min_score = inf;
