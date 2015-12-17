@@ -4,8 +4,8 @@ function model = build_KNN(data, labels, parameters)
         K = 5;
         feature_params = {0 1 100 1 1};
     elseif length(parameters) == 2
-        K = parameters{1};
-        feature_params = parameters{2};
+        feature_params = parameters{1};
+        K = parameters{2};
     else
         disp('Incorrect number of parameters');
         return;
