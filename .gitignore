@@ -1,6 +1,7 @@
 *.DS_Store
 *~
 vlfeat*
-cifar-100-matlab
+*cifar*
 *.mat
+*.tar
 octave-workspace
